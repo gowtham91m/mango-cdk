@@ -6,7 +6,7 @@ import { MangoCdkStack } from '../lib/mango-cdk-stack';
 const app = new cdk.App();
 new MangoCdkStack(app, 'MangoCdkStack', {
   env: {
-    account: '484235524795',
+    account: '147866640792',
     region: 'eu-west-2',
   }
 });
