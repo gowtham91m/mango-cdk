@@ -7,7 +7,7 @@ const app = new cdk.App();
 new MangoCdkStack(app, 'MangoCdkStack', {
   env: {
     account: '147866640792',
-    region: 'eu-west-2',
+    region: 'us-west-2',
   }
 });
 
