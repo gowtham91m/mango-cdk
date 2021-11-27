@@ -7,8 +7,8 @@ import { AmplifyStack } from '../amplify-stack/amplify-stack';
 class MyApplication extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props);
-    new MyLambdaStack(this, 'lambda');
-    new AmplifyStack(this, 'mangofruity', {
+    new MyLambdaStack(this, `${id}-lambda`);
+    new AmplifyStack(this, `${id}-amplify`, {
       owner: "gowtham91m",
       repository: "mangofruity",
       secret: "mangofruity"
@@ -20,10 +20,10 @@ export class PipelineStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const pipeline = new CodePipeline(this, 'Pipeline',
+    const pipeline = new CodePipeline(this, `${id}-PipelineStack-`,
       {
         crossAccountKeys: true,
-        selfMutation: true,
+        selfMutation: false,
         pipelineName: "MangofruityCDK",
         synth: new ShellStep('Synth', {
           input: CodePipelineSource.connection('gowtham91m/mango-cdk', 'main', {
@@ -37,7 +37,7 @@ export class PipelineStack extends cdk.Stack {
         }),
       });
 
-    pipeline.addStage(new MyApplication(this, 'Staging', {
+    pipeline.addStage(new MyApplication(this, `Staging`, {
       env: {
         account: '697393813417',
         region: 'us-west-2',
