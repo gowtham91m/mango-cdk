@@ -8,10 +8,17 @@ class MyApplication extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props);
     new MyLambdaStack(this, `${id}-lambda`);
+
     new AmplifyStack(this, `${id}-amplify`, {
       owner: "gowtham91m",
       repository: "mangofruity",
-      secret: "mangofruity"
+      secret: "mango-github"
+    });
+
+    new AmplifyStack(this, `${id}-amplify-admin`, {
+      owner: "gowtham91m",
+      repository: "mangofruity-admin",
+      secret: "mango-github"
     });
   }
 }
@@ -39,7 +46,13 @@ export class PipelineStack extends cdk.Stack {
 
     pipeline.addStage(new MyApplication(this, `Staging`, {
       env: {
-        account: '697393813417',
+        account: '147866640792',
+        region: 'us-west-2',
+      },
+    }));
+    pipeline.addStage(new MyApplication(this, `Prod`, {
+      env: {
+        account: '049586541010',
         region: 'us-west-2',
       },
     }));
