@@ -23,6 +23,7 @@ export class PipelineStack extends cdk.Stack {
     const pipeline = new CodePipeline(this, 'Pipeline',
       {
         crossAccountKeys: true,
+        selfMutation: true,
         pipelineName: "MangofruityCDK",
         synth: new ShellStep('Synth', {
           input: CodePipelineSource.connection('gowtham91m/mango-cdk', 'main', {
