@@ -1,14 +1,18 @@
 import * as cdk from '@aws-cdk/core';
 import { Construct, Stage, StageProps } from '@aws-cdk/core';
-import { MyLambdaStack } from './lambda-stack';
+import { MyLambdaStack } from '../lambda-stack/lambda-stack';
 import { CodePipeline, CodePipelineSource, ShellStep } from '@aws-cdk/pipelines';
-import { AmplifyStack } from './amplify-stack';
+import { AmplifyStack } from '../amplify-stack/amplify-stack';
 
 class MyApplication extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props);
     new MyLambdaStack(this, 'lambda');
-    new AmplifyStack(this, 'mangofruity');
+    new AmplifyStack(this, 'mangofruity', {
+      owner: "gowtham91m",
+      repository: "mangofruity",
+      secret: "mangofruity"
+    });
   }
 }
 
