@@ -15,13 +15,6 @@ class MyApplication extends Stage {
       secret: "mango-github",
       branch: "main"
     });
-
-    new AmplifyStack(this, `${id}-amplify-admin`, {
-      owner: "gowtham91m",
-      repository: "mangofruity-admin",
-      secret: "mango-github",
-      branch: "master"
-    });
   }
 }
 
