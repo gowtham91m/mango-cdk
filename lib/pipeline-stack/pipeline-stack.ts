@@ -11,7 +11,7 @@ class MyApplication extends Stage {
 
     new AmplifyStack(this, `${id}-amplify`, {
       owner: "gowtham91m",
-      repository: "mangofruity",
+      repository: "mangokulfi",
       secret: "mango-github",
       branch: "main",
       domainName: "mangokulfi.com"
@@ -27,7 +27,7 @@ export class PipelineStack extends cdk.Stack {
       {
         crossAccountKeys: true,
         selfMutation: false,
-        pipelineName: "MangofruityCDK",
+        pipelineName: "MangokulfiCDK",
         synth: new ShellStep('Synth', {
           input: CodePipelineSource.connection('gowtham91m/mango-cdk', 'main', {
             connectionArn: 'arn:aws:codestar-connections:us-west-2:147866640792:connection/4b18bea2-9eb6-47b1-bbdc-adb3bf6fd2a9',

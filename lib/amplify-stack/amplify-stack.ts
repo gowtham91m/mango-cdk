@@ -6,7 +6,7 @@ export class AmplifyStack extends Stack {
     constructor(scope: Construct, id: string, props: AmplifyStackProps) {
         super(scope, id, props);
 
-        const amplifyApp = new amplify.App(this, `MangoFruityApp-${id}`, {
+        const amplifyApp = new amplify.App(this, `MangokulfiApp-${id}`, {
             sourceCodeProvider: new amplify.GitHubSourceCodeProvider({
                 owner: props.owner,
                 repository: props.repository,
