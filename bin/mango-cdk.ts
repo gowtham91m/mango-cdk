@@ -8,7 +8,8 @@ new PipelineStack(app, 'pipeline', {
   env: {
     account: '147866640792',
     region: 'us-west-2',
-  }
+  },
+  notificatioEmail: "gowtham.91m@gmail.com"
 });
 
 app.synth();

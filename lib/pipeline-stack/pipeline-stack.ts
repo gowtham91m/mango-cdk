@@ -3,6 +3,10 @@ import { Construct, Stage, StageProps } from '@aws-cdk/core';
 import { MyLambdaStack } from '../lambda-stack/lambda-stack';
 import { CodePipeline, CodePipelineSource, ShellStep } from '@aws-cdk/pipelines';
 import { AmplifyStack } from '../amplify-stack/amplify-stack';
+import { Topic } from '@aws-cdk/aws-sns';
+import * as snsSubscriptions from '@aws-cdk/aws-sns-subscriptions';
+import { PipelineStackProps } from './pipeline-stack-props'
+import { DetailType, NotificationRule } from '@aws-cdk/aws-codestarnotifications';
 
 class MyApplication extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
@@ -20,7 +24,7 @@ class MyApplication extends Stage {
 }
 
 export class PipelineStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
 
     const pipeline = new CodePipeline(this, `${id}-PipelineStack-`,
@@ -52,5 +56,18 @@ export class PipelineStack extends cdk.Stack {
         region: 'us-west-2',
       },
     }));
+    pipeline.buildPipeline();
+
+    // create sns topic for failure notifications
+    const snsTopic = new Topic(this, "pipelineFailureSNS", { topicName: "pipelineFailureNofitications" });
+    snsTopic.addSubscription(new snsSubscriptions.EmailSubscription(props.notificatioEmail))
+    new NotificationRule(this, 'pipelineFailureNofitications', {
+      detailType: DetailType.BASIC,
+      events: ['codepipeline-pipeline-pipeline-execution-failed'],
+      source: pipeline.pipeline,
+      targets: [snsTopic],
+    });
+
+    // pipeline.pipeline.notifyOnExecutionStateChange("notify",notificationTarget)
   }
 }
