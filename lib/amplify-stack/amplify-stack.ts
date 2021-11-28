@@ -12,30 +12,8 @@ export class AmplifyStack extends Stack {
                 owner: props.owner,
                 repository: props.repository,
                 oauthToken: SecretValue.secretsManager(props.secret)
-            }),
-            buildSpec: codebuild.BuildSpec.fromObjectToYaml({
-                version: '1.0',
-                frontend: {
-                    phases: {
-                        preBuild: {
-                            commands: [
-                                'npm install'
-                            ]
-                        },
-                        build: {
-                            commands: [
-                                'npm run build'
-                            ]
-                        }
-                    },
-                    artifacts: {
-                        baseDirectory: 'build',
-                        files:
-                            - '**/*'
-                    }
-                }
             })
         });
-        amplifyApp.addBranch("main");
+        amplifyApp.addBranch(props.branch);
     }
 }

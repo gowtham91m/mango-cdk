@@ -12,13 +12,15 @@ class MyApplication extends Stage {
     new AmplifyStack(this, `${id}-amplify`, {
       owner: "gowtham91m",
       repository: "mangofruity",
-      secret: "mango-github"
+      secret: "mango-github",
+      branch: "main"
     });
 
     new AmplifyStack(this, `${id}-amplify-admin`, {
       owner: "gowtham91m",
       repository: "mangofruity-admin",
-      secret: "mango-github"
+      secret: "mango-github",
+      branch: "master"
     });
   }
 }
