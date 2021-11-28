@@ -5,7 +5,7 @@ import { PipelineStack } from '../lib/pipeline-stack/pipeline-stack';
 test('Empty Stack', () => {
   const app = new cdk.App();
   // WHEN
-  const stack = new PipelineStack(app, 'MyTestStack');
+  const stack = new PipelineStack(app, 'MyTestStack', { notificatioEmail: "gowtham.91m@gmail.com" });
   // THEN
   expectCDK(stack).to(matchTemplate({
     "Resources": {}
