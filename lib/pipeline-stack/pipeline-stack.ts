@@ -13,7 +13,8 @@ class MyApplication extends Stage {
       owner: "gowtham91m",
       repository: "mangofruity",
       secret: "mango-github",
-      branch: "main"
+      branch: "main",
+      domainName: "mangokulfi.com"
     });
   }
 }

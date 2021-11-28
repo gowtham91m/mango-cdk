@@ -1,5 +1,4 @@
 import * as amplify from '@aws-cdk/aws-amplify';
-import * as codebuild from '@aws-cdk/aws-codebuild';
 import { AmplifyStackProps } from './amplify-stack-props';
 import { Stack, Construct, SecretValue } from '@aws-cdk/core';
 
@@ -14,6 +13,16 @@ export class AmplifyStack extends Stack {
                 oauthToken: SecretValue.secretsManager(props.secret)
             })
         });
-        amplifyApp.addBranch(props.branch);
+        const main = amplifyApp.addBranch(props.branch);
+        // amplifyApp.addCustomRule(amplify.CustomRule.SINGLE_PAGE_APPLICATION_REDIRECT);
+
+        if (id.startsWith("Prod")) {
+            const domain = amplifyApp.addDomain(props.domainName, {
+                enableAutoSubdomain: true, // in case subdomains should be auto registered for branches
+                autoSubdomainCreationPatterns: ['*', 'pr*'], // regex for branches that should auto register subdomains
+            });
+            domain.mapRoot(main); // map main branch to domain root
+            domain.mapSubDomain(main, 'www');
+        }
     }
 }

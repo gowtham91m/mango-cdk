@@ -5,4 +5,5 @@ export interface AmplifyStackProps extends StackProps {
     readonly repository: string;
     readonly secret: string;
     readonly branch: string;
+    readonly domainName: string;
 }
