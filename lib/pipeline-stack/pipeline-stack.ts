@@ -16,7 +16,7 @@ class MyApplication extends Stage {
     new AmplifyStack(this, `${id}-amplify`, {
       owner: "gowtham91m",
       repository: "mangotrails",
-      secret: "github-token",
+      secret: "git-token",
       branch: "main",
       domainName: "themangotrails.com"
     });
