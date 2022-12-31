@@ -1,12 +1,13 @@
 import * as amplify from '@aws-cdk/aws-amplify';
 import { AmplifyStackProps } from './amplify-stack-props';
-import { Stack, Construct, SecretValue } from '@aws-cdk/core';
+import { Stack, Construct, SecretValue, RemovalPolicy } from '@aws-cdk/core';
+import { UserPool } from '@aws-cdk/aws-cognito';
 
 export class AmplifyStack extends Stack {
     constructor(scope: Construct, id: string, props: AmplifyStackProps) {
         super(scope, id, props);
 
-        const amplifyApp = new amplify.App(this, `MangokulfiApp-${id}`, {
+        const amplifyApp = new amplify.App(this, `MangotrailsApp-${id}`, {
             sourceCodeProvider: new amplify.GitHubSourceCodeProvider({
                 owner: props.owner,
                 repository: props.repository,
@@ -14,7 +15,11 @@ export class AmplifyStack extends Stack {
             })
         });
         const main = amplifyApp.addBranch(props.branch);
-        // amplifyApp.addCustomRule(amplify.CustomRule.SINGLE_PAGE_APPLICATION_REDIRECT);
+
+        // create cognito user pool
+        new UserPool(this, 'mangoadminpool', {
+            userPoolName: 'mangoadmin-userpool', removalPolicy: RemovalPolicy.DESTROY
+        });
 
         if (id.startsWith("Prod")) {
             const domain = amplifyApp.addDomain(props.domainName, {

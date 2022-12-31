@@ -15,10 +15,10 @@ class MyApplication extends Stage {
 
     new AmplifyStack(this, `${id}-amplify`, {
       owner: "gowtham91m",
-      repository: "mangokulfi",
-      secret: "mango-github",
+      repository: "mangotrails",
+      secret: "github-token",
       branch: "main",
-      domainName: "mangokulfi.com"
+      domainName: "themangotrails.com"
     });
   }
 }
