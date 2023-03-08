@@ -5,27 +5,33 @@ import {
   ShellStep,
 } from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
-import { AmplifyStack } from "./stacks/amplify-stack";
+// import { AmplifyStack } from "./stacks/amplify-stack";
+import {GraphQLStack} from "./stacks/graphql-stack";
 
 class MangoCdk extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props);
-    new AmplifyStack(this, `AmplifyStack`, {
-      owner: "gowtham91m",
-      repository: "mangotrails",
-      secret: "git-token",
-      branch: "main",
-      domainName: "themangotrails.com",
-    });
+
+    // new AmplifyStack(this, `AmplifyStack`, {
+    //   owner: "gowtham91m",
+    //   repository: "mangotrails",
+    //   secret: "git-token",
+    //   branch: "main",
+    //   domainName: "themangotrails.com",
+    // });
+
+    new GraphQLStack(this, "GraphQLStack", {dynamoDbName:"Favorites"});
+
   }
 }
+
 
 export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
     const pipeline = new CodePipeline(this, `CodePipeline`, {
       crossAccountKeys: true,
-      selfMutation: false,
+      selfMutation: true,
       pipelineName: "MangotrailsCDK",
       synth: new ShellStep("Synth", {
         input: CodePipelineSource.connection("gowtham91m/mango-cdk", "main", {
@@ -36,14 +42,14 @@ export class PipelineStack extends Stack {
       }),
     });
 
-    // pipeline.addStage(
-    //   new MangoCdk(this, `prod`, {
-    //     env: {
-    //       account: "049586541010",
-    //       region: "us-west-2",
-    //     },
-    //   })
-    // );
+    pipeline.addStage(
+      new MangoCdk(this, `prod`, {
+        env: {
+          account: "049586541010",
+          region: "us-west-2",
+        },
+      })
+    );
     pipeline.buildPipeline();
   }
 }

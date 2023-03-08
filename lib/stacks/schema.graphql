@@ -1,0 +1,139 @@
+﻿input CreateFavoritesInput {
+  title: String!
+  type: String!
+  description: String
+  rating: String
+  genre: String
+  thumbnail: String
+}
+
+input DeleteFavoritesInput {
+  title: String!
+  type: String!
+}
+
+type Favorites {
+  title: String!
+  type: String!
+  description: String
+  rating: String
+  genre: String
+  thumbnail: String
+}
+
+type FavoritesConnection {
+  items: [Favorites]
+  nextToken: String
+}
+
+type Mutation {
+  createFavorites(input: CreateFavoritesInput!): Favorites
+  updateFavorites(input: UpdateFavoritesInput!): Favorites
+  deleteFavorites(input: DeleteFavoritesInput!): Favorites
+}
+
+type Query {
+  getFavorites(type: String!, title: String!): Favorites
+  listFavorites(
+    filter: TableFavoritesFilterInput
+    limit: Int
+    nextToken: String
+  ): FavoritesConnection
+}
+
+type Subscription {
+  onCreateFavorites(
+    title: String
+    type: String
+    description: String
+    rating: String
+    genre: String
+  ): Favorites @aws_subscribe(mutations: ["createFavorites"])
+  onUpdateFavorites(
+    title: String
+    type: String
+    description: String
+    rating: String
+    genre: String
+  ): Favorites @aws_subscribe(mutations: ["updateFavorites"])
+  onDeleteFavorites(
+    title: String
+    type: String
+    description: String
+    rating: String
+    genre: String
+  ): Favorites @aws_subscribe(mutations: ["deleteFavorites"])
+}
+
+input TableBooleanFilterInput {
+  ne: Boolean
+  eq: Boolean
+}
+
+input TableFavoritesFilterInput {
+  title: TableStringFilterInput
+  type: TableStringFilterInput
+  description: TableStringFilterInput
+  rating: TableStringFilterInput
+  genre: TableStringFilterInput
+  thumbnail: TableStringFilterInput
+}
+
+input TableFloatFilterInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  contains: Float
+  notContains: Float
+  between: [Float]
+}
+
+input TableIDFilterInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+}
+
+input TableIntFilterInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  contains: Int
+  notContains: Int
+  between: [Int]
+}
+
+input TableStringFilterInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+}
+
+input UpdateFavoritesInput {
+  title: String!
+  type: String!
+  description: String
+  rating: String
+  genre: String
+  thumbnail: String
+}
