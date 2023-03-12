@@ -4,7 +4,8 @@
   description: String
   rating: String
   genre: String
-  thumbnail: String
+  author: String
+  image: String
 }
 
 input DeleteFavoritesInput {
@@ -13,17 +14,18 @@ input DeleteFavoritesInput {
 }
 
 type Favorites {
-  title: String!
-  type: String!
-  description: String
-  rating: String
-  genre: String
-  thumbnail: String
+  title: String! @aws_api_key
+  type: String! @aws_api_key
+  description: String @aws_api_key
+  rating: String @aws_api_key
+  genre: String @aws_api_key
+  author: String @aws_api_key
+  image: String @aws_api_key
 }
 
 type FavoritesConnection {
-  items: [Favorites]
-  nextToken: String
+  items: [Favorites] @aws_api_key
+  nextToken: String @aws_api_key
 }
 
 type Mutation {
@@ -38,7 +40,7 @@ type Query {
     filter: TableFavoritesFilterInput
     limit: Int
     nextToken: String
-  ): FavoritesConnection
+  ): FavoritesConnection @aws_api_key
 }
 
 type Subscription {
@@ -76,7 +78,8 @@ input TableFavoritesFilterInput {
   description: TableStringFilterInput
   rating: TableStringFilterInput
   genre: TableStringFilterInput
-  thumbnail: TableStringFilterInput
+  author: TableStringFilterInput
+  image: TableStringFilterInput
 }
 
 input TableFloatFilterInput {
@@ -135,5 +138,6 @@ input UpdateFavoritesInput {
   description: String
   rating: String
   genre: String
-  thumbnail: String
+  author: String
+  image: String
 }
