@@ -5,8 +5,9 @@ import {
   ShellStep,
 } from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
+import { GraphQLStack } from "./stacks/graphql-stack/graphql-stack";
 // import { AmplifyStack } from "./stacks/amplify-stack";
-import {GraphQLStack} from "./stacks/graphql-stack";
+
 
 class MangoCdk extends Stage {
   constructor(scope: Construct, id: string, props?: StageProps) {
