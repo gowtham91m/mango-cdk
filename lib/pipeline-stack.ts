@@ -39,7 +39,7 @@ export class PipelineStack extends Stack {
           connectionArn:
             "arn:aws:codestar-connections:us-west-2:147866640792:connection/4b18bea2-9eb6-47b1-bbdc-adb3bf6fd2a9",
         }),
-        commands: ["npm ci", "npm run build", "npx cdk synth"],
+        commands: ["npm install", "npm ci", "npm run build", "npx cdk synth"],
       }),
     });
 
