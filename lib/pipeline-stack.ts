@@ -6,11 +6,26 @@ import {
 } from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
 import { GraphQLStack } from "./stacks/graphql-stack/graphql-stack";
+import { CloudfrontStack } from "./stacks/cloudfront-stack/cloudfront-stack";
 // import { AmplifyStack } from "./stacks/amplify-stack";
 
+const accounts = [{
+  account: "049586541010",
+  stage: 'prod',
+  region: "us-west-2",
+},
+{
+  account: "147866640792",
+  stage: 'stage',
+  region: "us-west-2",
+}]
+
+interface CdkStackProps extends StageProps {
+  stageName: string;
+}
 
 class MangoCdk extends Stage {
-  constructor(scope: Construct, id: string, props?: StageProps) {
+  constructor(scope: Construct, id: string, props?: CdkStackProps) {
     super(scope, id, props);
 
     // new AmplifyStack(this, `AmplifyStack`, {
@@ -22,9 +37,11 @@ class MangoCdk extends Stage {
     // });
 
     new GraphQLStack(this, "GraphQLStack", {dynamoDbName:"Favorites"});
+    new CloudfrontStack(this, "CloudfrontStack", {stage: props?.stageName});
 
   }
 }
+
 
 
 export class PipelineStack extends Stack {
@@ -43,14 +60,19 @@ export class PipelineStack extends Stack {
       }),
     });
 
+    // const ReactAssetsPipeline = new CodePipeline();
+
+    accounts.forEach((account) => {
     pipeline.addStage(
-      new MangoCdk(this, `prod`, {
+      new MangoCdk(this, `${account.stage}`, {
         env: {
-          account: "049586541010",
-          region: "us-west-2",
+          account: account.account,
+          region: account.region,
         },
+        stageName: account.stage,
       })
     );
+    });
     pipeline.buildPipeline();
   }
 }

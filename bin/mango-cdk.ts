@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { PipelineStack } from '../lib/pipeline-stack';
+import { ReactPipelineStack } from '../lib/stacks/react-assets-pipeline-stack/react-assets-pipeline-stack';
 
 const app = new cdk.App();
 new PipelineStack(app, 'MangotrailsPipeline', {
@@ -19,3 +20,5 @@ new PipelineStack(app, 'MangotrailsPipeline', {
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
+
+const pipeline = new ReactPipelineStack(app, 'ReactPipelineStack', {env: {account: '147866640792', region: 'us-west-2'}} );
