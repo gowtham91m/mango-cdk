@@ -22,6 +22,8 @@ interface CloudfrontStackProps extends StackProps {
 }
 
 export class CloudfrontStack extends Stack {
+  public cert: DnsValidatedCertificate;
+
   constructor(scope: Construct, id: string, props: CloudfrontStackProps) {
     super(scope, id, props);
 
@@ -49,15 +51,16 @@ export class CloudfrontStack extends Stack {
         "gowtham-live-hosted-zone",
         { domainName: "gowtham.live" }
       );
-      const cert = new DnsValidatedCertificate(
+      this.cert = new DnsValidatedCertificate(
         this,
         "CreateReactAppCertificate",
         {
-          domainName: "gowtham.live",
+          domainName: "*.gowtham.live",
           hostedZone: hostedZone,
           region: "us-east-1",
         }
       );
+
       const cloudfrontDistribution = new Distribution(
         this,
         "CreateReactAppCloudfront",
@@ -66,7 +69,7 @@ export class CloudfrontStack extends Stack {
             origin: new S3Origin(bucket),
             originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
           },
-          certificate: cert,
+          certificate: this.cert,
           domainNames: ["gowtham.live"],
         }
       );

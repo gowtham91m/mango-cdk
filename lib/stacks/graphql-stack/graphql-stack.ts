@@ -3,9 +3,12 @@ import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import { Construct } from "constructs";
 import path = require("path");
+import { DnsValidatedCertificate } from "aws-cdk-lib/aws-certificatemanager";
 
 interface GraphQLStackProps extends StackProps {
   readonly dynamoDbName: string;
+  readonly cert: DnsValidatedCertificate;
+  stageName: string;
 }
 
 export class GraphQLStack extends Stack {
@@ -22,6 +25,11 @@ export class GraphQLStack extends Stack {
 
     const api = new appsync.GraphqlApi(this, "api", {
       name: "Favorites-api",
+
+      domainName:
+        props.stackName == "prod"
+          ? { domainName: "favorites.gowtham.live", certificate: props.cert }
+          : undefined,
       schema: appsync.SchemaFile.fromAsset(
         path.join(__dirname, "schema.graphql")
       ),
