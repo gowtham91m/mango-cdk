@@ -56,8 +56,9 @@ export class CloudfrontStack extends Stack {
         "CreateReactAppCertificate",
         {
           domainName: "*.gowtham.live",
+          subjectAlternativeNames: ["gowtham.live", "www.gowtham.live"],
           hostedZone: hostedZone,
-          region: "us-east-1",
+          region: "us-east-1"          
         }
       );
 
