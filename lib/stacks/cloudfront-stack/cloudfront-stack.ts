@@ -32,7 +32,6 @@ export class CloudfrontStack extends Stack {
       publicReadAccess: true,
       bucketName: `gowtham-portfolio-react-assets-${props.stage}`,
       removalPolicy: RemovalPolicy.DESTROY,
-      websiteIndexDocument: "index.html",
       blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
       accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
     });
@@ -70,8 +69,10 @@ export class CloudfrontStack extends Stack {
             origin: new S3Origin(bucket),
             originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
           },
+          defaultRootObject: "index.html",
           certificate: this.cert,
           domainNames: ["gowtham.live"],
+          errorResponses: [{httpStatus: 403,responsePagePath: "/index.html"}]
         }
       );
       bucket.addToResourcePolicy(

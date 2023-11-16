@@ -1,20 +1,12 @@
-import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
-import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
-import * as appsync from "aws-cdk-lib/aws-appsync";
+import { Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import path = require("path");
 import {
-  BlockPublicAccess,
   Bucket,
-  BucketAccessControl,
 } from "aws-cdk-lib/aws-s3";
-import { CodePipeline, CodePipelineSource } from "aws-cdk-lib/pipelines";
 import { Artifact, Pipeline } from "aws-cdk-lib/aws-codepipeline";
 import {
   CodeBuildAction,
-  CodeCommitSourceAction,
   CodeStarConnectionsSourceAction,
-  GitHubSourceAction,
   S3DeployAction,
 } from "aws-cdk-lib/aws-codepipeline-actions";
 import {
@@ -22,7 +14,6 @@ import {
   LinuxBuildImage,
   PipelineProject,
 } from "aws-cdk-lib/aws-codebuild";
-import { ArnPrincipal, PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export class ReactPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {

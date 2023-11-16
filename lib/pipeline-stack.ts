@@ -7,7 +7,6 @@ import {
 import { Construct } from "constructs";
 import { GraphQLStack } from "./stacks/graphql-stack/graphql-stack";
 import { CloudfrontStack } from "./stacks/cloudfront-stack/cloudfront-stack";
-// import { AmplifyStack } from "./stacks/amplify-stack";
 
 const accounts = [
   {
