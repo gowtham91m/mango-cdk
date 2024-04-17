@@ -1,19 +1,20 @@
-import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { Environment, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
-import * as appsync from "aws-cdk-lib/aws-appsync";
+import {AuthorizationType, CfnDomainName, CfnDomainNameApiAssociation, Definition, GraphqlApi, MappingTemplate, SchemaFile} from "aws-cdk-lib/aws-appsync";
 import { Construct } from "constructs";
 import path = require("path");
-import { DnsValidatedCertificate } from "aws-cdk-lib/aws-certificatemanager";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 
 interface GraphQLStackProps extends StackProps {
   readonly dynamoDbName: string;
-  readonly cert: DnsValidatedCertificate;
+  readonly cert: Certificate;
   stageName: string;
+  env?: Environment;
 }
 
 export class GraphQLStack extends Stack {
   constructor(scope: Construct, id: string, props: GraphQLStackProps) {
-    super(scope, id, props);
+    super(scope, id, {...props, env:{ account: "049586541010", region: "us-east-1" }});
 
     const favoritesTable = new Table(this, props.dynamoDbName, {
       tableName: "Favorites",
@@ -23,25 +24,48 @@ export class GraphQLStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    const api = new appsync.GraphqlApi(this, "api", {
+    const appSyncApi = new GraphqlApi(this, "api", {
       name: "Favorites-api",
-
-      domainName:
-        props.stackName == "prod"
-          ? { domainName: "favorites.gowtham.live", certificate: props.cert }
-          : undefined,
-      schema: appsync.SchemaFile.fromAsset(
-        path.join(__dirname, "schema.graphql")
-      ),
+      definition: Definition.fromFile(path.join(__dirname, 'schema.graphql')),
       authorizationConfig: {
         defaultAuthorization: {
-          authorizationType: appsync.AuthorizationType.IAM,
+          authorizationType: AuthorizationType.IAM,
         },
       },
       xrayEnabled: true,
     });
 
-    const dataSource = api.addDynamoDbDataSource(
+
+    if (props.stageName == 'prod'){
+
+    const appsyncDomainName = new CfnDomainName(
+      this,
+      'AppsyncDomainName',
+      {
+        certificateArn: props.cert.certificateArn,
+        domainName: "interests.gowtham.live",
+      }
+    );
+    
+    
+    const assoc = new CfnDomainNameApiAssociation(
+      this,
+      'MyCfnDomainNameApiAssociation',
+      {
+        apiId: appSyncApi.apiId,
+        domainName: "interests.gowtham.live",
+      }
+    );
+    
+    //  Required to ensure the resources are created in order
+    // assoc.addDependsOn(appsyncDomainName);
+assoc.addDependency(appsyncDomainName)
+
+    }
+
+
+
+    const dataSource = appSyncApi.addDynamoDbDataSource(
       "FavoritesDDBTable",
       favoritesTable
     );
@@ -49,7 +73,7 @@ export class GraphQLStack extends Stack {
     dataSource.createResolver("getFavoritesResolver", {
       typeName: "Query",
       fieldName: "getFavorites",
-      requestMappingTemplate: appsync.MappingTemplate.fromString(`{
+      requestMappingTemplate: MappingTemplate.fromString(`{
             "version": "2017-02-28",
             "operation": "GetItem",
             "key": {
@@ -57,7 +81,7 @@ export class GraphQLStack extends Stack {
               "title": $util.dynamodb.toDynamoDBJson($ctx.args.title),
             },
           }`),
-      responseMappingTemplate: appsync.MappingTemplate.fromString(
+      responseMappingTemplate: MappingTemplate.fromString(
         "$util.toJson($context.result)"
       ),
     });
@@ -65,7 +89,7 @@ export class GraphQLStack extends Stack {
     dataSource.createResolver("listFavoritesResolver", {
       typeName: "Query",
       fieldName: "listFavorites",
-      requestMappingTemplate: appsync.MappingTemplate.fromString(`
+      requestMappingTemplate: MappingTemplate.fromString(`
       {
         "version": "2017-02-28",
         "operation": "Scan",
@@ -74,7 +98,7 @@ export class GraphQLStack extends Stack {
         "nextToken": $util.toJson($util.defaultIfNullOrEmpty($ctx.args.nextToken, null)),
       }
   `),
-      responseMappingTemplate: appsync.MappingTemplate.fromString(
+      responseMappingTemplate: MappingTemplate.fromString(
         "$util.toJson($context.result)"
       ),
     });
@@ -82,7 +106,7 @@ export class GraphQLStack extends Stack {
     dataSource.createResolver("createFavorites", {
       typeName: "Mutation",
       fieldName: "createFavorites",
-      requestMappingTemplate: appsync.MappingTemplate.fromString(`
+      requestMappingTemplate: MappingTemplate.fromString(`
       {
   "version": "2017-02-28",
   "operation": "PutItem",
@@ -99,7 +123,7 @@ export class GraphQLStack extends Stack {
     },
   },
 }`),
-      responseMappingTemplate: appsync.MappingTemplate.fromString(
+      responseMappingTemplate: MappingTemplate.fromString(
         "$util.toJson($context.result)"
       ),
     });
@@ -107,10 +131,10 @@ export class GraphQLStack extends Stack {
     dataSource.createResolver("updateFavorites", {
       typeName: "Mutation",
       fieldName: "updateFavorites",
-      requestMappingTemplate: appsync.MappingTemplate.fromFile(
+      requestMappingTemplate: MappingTemplate.fromFile(
         path.join(__dirname, "./resolvers/Mutation.updateFavorites.request.vtl")
       ),
-      responseMappingTemplate: appsync.MappingTemplate.fromFile(
+      responseMappingTemplate: MappingTemplate.fromFile(
         path.join(
           __dirname,
           "./resolvers/Mutation.updateFavorites.response.vtl"
@@ -121,7 +145,7 @@ export class GraphQLStack extends Stack {
     dataSource.createResolver("deleteFavorites", {
       typeName: "Mutation",
       fieldName: "deleteFavorites",
-      requestMappingTemplate: appsync.MappingTemplate.fromString(`
+      requestMappingTemplate: MappingTemplate.fromString(`
      {
   "version": "2017-02-28",
   "operation": "DeleteItem",
@@ -130,7 +154,7 @@ export class GraphQLStack extends Stack {
     "title": $util.dynamodb.toDynamoDBJson($ctx.args.input.title),
   },
 }`),
-      responseMappingTemplate: appsync.MappingTemplate.fromString(
+      responseMappingTemplate: MappingTemplate.fromString(
         "$util.toJson($context.result)"
       ),
     });

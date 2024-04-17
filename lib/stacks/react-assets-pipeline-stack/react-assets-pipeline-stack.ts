@@ -1,9 +1,11 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import {
+  BlockPublicAccess,
   Bucket,
+  BucketAccessControl,
 } from "aws-cdk-lib/aws-s3";
-import { Artifact, Pipeline } from "aws-cdk-lib/aws-codepipeline";
+import { Artifact, Pipeline, PipelineType } from "aws-cdk-lib/aws-codepipeline";
 import {
   CodeBuildAction,
   CodeStarConnectionsSourceAction,
@@ -14,14 +16,21 @@ import {
   LinuxBuildImage,
   PipelineProject,
 } from "aws-cdk-lib/aws-codebuild";
+import { CdkStackProps } from "../../pipeline-stack";
+
 
 export class ReactPipelineStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: CdkStackProps) {
     super(scope, id, props);
 
-    const stageBucket =  Bucket.fromBucketName(this, "StageBucket",  "gowtham-portfolio-react-assets-stage")
-    const prodBucket =  Bucket.fromBucketName(this, "ProdBucket",  "gowtham-portfolio-react-assets-prod")
-
+    const bucket = new Bucket(this, "CreateReactAppBucket", {
+      publicReadAccess: true,
+      bucketName: `gowtham-portfolio-react-assets-${props?.stageName}`,
+      removalPolicy: RemovalPolicy.DESTROY,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
+      accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
+    });
+    
     const getBuildSpec = () => {
       return BuildSpec.fromObject({
         version: "0.2",
@@ -55,13 +64,14 @@ export class ReactPipelineStack extends Stack {
     };
 
     const pipeline = new Pipeline(this, `CodePipeline`, {
-      crossAccountKeys: true,
+      // crossAccountKeys: true,
       pipelineName: "GowthamPortfolioReact",
+      pipelineType: PipelineType.V2
     });
 
     const sourceAction = new CodeStarConnectionsSourceAction({
       connectionArn:
-        "arn:aws:codestar-connections:us-west-2:147866640792:connection/4b18bea2-9eb6-47b1-bbdc-adb3bf6fd2a9",
+        "arn:aws:codestar-connections:us-east-1:049586541010:connection/1c246387-1a8d-4e0b-a6a4-d531a8dc980a",
       output: new Artifact("source"),
       actionName: "GitHub",
       owner: "gowtham91m",
@@ -79,14 +89,8 @@ export class ReactPipelineStack extends Stack {
     });
 
     const deployAction = new S3DeployAction({
-      actionName: "S3Deploy",
-      bucket: stageBucket,
-      input: new Artifact("buildOutout"),
-    });
-
-    const prodDeployAction = new S3DeployAction({
         actionName: "prodS3Deploy",
-        bucket: prodBucket,
+        bucket: bucket,
         input: new Artifact("buildOutout")})
 
     pipeline.addStage({ stageName: "Source", actions: [sourceAction] });
@@ -102,7 +106,6 @@ export class ReactPipelineStack extends Stack {
       ],
     });
     pipeline.addStage({ stageName: "Deploy", actions: [deployAction] });
-    pipeline.addStage({ stageName: "ProdDeploy", actions: [prodDeployAction] });
   
   }
 }

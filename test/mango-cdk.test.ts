@@ -9,7 +9,7 @@ test("CloudfrontStack test", () => {
   console.log("test ggwm")
   const app = new cdk.App();
   // WHEN
-  const stack = new CloudfrontStack(app, "MyTestStack",{});
+  const stack = new CloudfrontStack(app, "MyTestStack",{stageName:"beta"});
   // THEN
   const template = Template.fromStack(stack);
 
