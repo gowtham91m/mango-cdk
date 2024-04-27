@@ -1,9 +1,17 @@
-import { Environment, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { Environment, Fn, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
-import {AuthorizationType, CfnDomainName, CfnDomainNameApiAssociation, Definition, GraphqlApi, MappingTemplate, SchemaFile} from "aws-cdk-lib/aws-appsync";
+import {
+  AuthorizationType,
+  CfnDomainName,
+  CfnDomainNameApiAssociation,
+  Definition,
+  GraphqlApi,
+  MappingTemplate,
+} from "aws-cdk-lib/aws-appsync";
 import { Construct } from "constructs";
 import path = require("path");
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import { CnameRecord, HostedZone } from "aws-cdk-lib/aws-route53";
 
 interface GraphQLStackProps extends StackProps {
   readonly dynamoDbName: string;
@@ -14,7 +22,10 @@ interface GraphQLStackProps extends StackProps {
 
 export class GraphQLStack extends Stack {
   constructor(scope: Construct, id: string, props: GraphQLStackProps) {
-    super(scope, id, {...props, env:{ account: "049586541010", region: "us-east-1" }});
+    super(scope, id, {
+      ...props,
+      env: { account: "049586541010", region: "us-east-1" },
+    });
 
     const favoritesTable = new Table(this, props.dynamoDbName, {
       tableName: "Favorites",
@@ -26,7 +37,7 @@ export class GraphQLStack extends Stack {
 
     const appSyncApi = new GraphqlApi(this, "api", {
       name: "Favorites-api",
-      definition: Definition.fromFile(path.join(__dirname, 'schema.graphql')),
+      definition: Definition.fromFile(path.join(__dirname, "schema.graphql")),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: AuthorizationType.IAM,
@@ -35,35 +46,30 @@ export class GraphQLStack extends Stack {
       xrayEnabled: true,
     });
 
-
-    if (props.stageName == 'prod'){
-
-    const appsyncDomainName = new CfnDomainName(
-      this,
-      'AppsyncDomainName',
-      {
+    if (props.stageName == "prod") {
+      const appsyncDomainName = new CfnDomainName(this, "AppsyncDomainName", {
         certificateArn: props.cert.certificateArn,
         domainName: "interests.gowtham.live",
-      }
-    );
-    
-    
-    const assoc = new CfnDomainNameApiAssociation(
-      this,
-      'MyCfnDomainNameApiAssociation',
-      {
-        apiId: appSyncApi.apiId,
-        domainName: "interests.gowtham.live",
-      }
-    );
-    
-    //  Required to ensure the resources are created in order
-    // assoc.addDependsOn(appsyncDomainName);
-assoc.addDependency(appsyncDomainName)
+      });
 
+      const assoc = new CfnDomainNameApiAssociation(
+        this,
+        "MyCfnDomainNameApiAssociation",
+        {
+          apiId: appSyncApi.apiId,
+          domainName: "interests.gowtham.live",
+        }
+      );
+      assoc.addDependency(appsyncDomainName);
+
+      new CnameRecord(this, `ApiAliasRecord`, {
+        recordName: "interests.gowtham.live",
+        zone: HostedZone.fromLookup(this, "Zone", {
+          domainName: "gowtham.live",
+        }),
+        domainName: Fn.select(2, Fn.split("/", appSyncApi.graphqlUrl)),
+      });
     }
-
-
 
     const dataSource = appSyncApi.addDynamoDbDataSource(
       "FavoritesDDBTable",
@@ -98,10 +104,14 @@ assoc.addDependency(appsyncDomainName)
         "nextToken": $util.toJson($util.defaultIfNullOrEmpty($ctx.args.nextToken, null)),
       }
   `),
-      responseMappingTemplate: MappingTemplate.fromString(
-        "$util.toJson($context.result)"
-      ),
+      responseMappingTemplate: MappingTemplate.fromString(`
+      $util.toJson($context.result)
+      `),
     });
+
+    // #set($context.result.headers.Access-Control-Allow-Origin = "https://gowtham.live")
+    // #set($context.response.header.Access-Control-Allow-Headers = "*")
+    // #set($context.response.header.Access-Control-Allow-Methods = "POST, GET, OPTIONS")
 
     dataSource.createResolver("createFavorites", {
       typeName: "Mutation",
@@ -158,5 +168,11 @@ assoc.addDependency(appsyncDomainName)
         "$util.toJson($context.result)"
       ),
     });
+
+    // const corsHeader = new AppSyncDataSource.Header({
+    //   name: "Access-Control-Allow-Origin",
+    //   value: "https://gowtham.live",
+    // });
+    // dataSource.addHeader(corsHeader);
   }
 }

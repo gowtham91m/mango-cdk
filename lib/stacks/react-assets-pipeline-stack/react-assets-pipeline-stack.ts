@@ -5,7 +5,7 @@ import {
   Bucket,
   BucketAccessControl,
 } from "aws-cdk-lib/aws-s3";
-import { Artifact, Pipeline, PipelineType } from "aws-cdk-lib/aws-codepipeline";
+import { Artifact, Pipeline, PipelineType, ProviderType } from "aws-cdk-lib/aws-codepipeline";
 import {
   CodeBuildAction,
   CodeStarConnectionsSourceAction,
@@ -69,6 +69,8 @@ export class ReactPipelineStack extends Stack {
       pipelineType: PipelineType.V2
     });
 
+
+
     const sourceAction = new CodeStarConnectionsSourceAction({
       connectionArn:
         "arn:aws:codestar-connections:us-east-1:049586541010:connection/1c246387-1a8d-4e0b-a6a4-d531a8dc980a",
@@ -78,6 +80,17 @@ export class ReactPipelineStack extends Stack {
       repo: "mangotrails",
       triggerOnPush: true,
     });
+
+    //     pipeline.addTrigger({
+    //   providerType: ProviderType.CODE_STAR_SOURCE_CONNECTION,
+    //   gitConfiguration: {
+    //     sourceAction,
+    //     pushFilter: [{
+    //       tagsExcludes: ['exclude1', 'exclude2'],
+    //       tagsIncludes: ['include*'],
+    //     }],
+    //   },
+    // })
 
     const buildAction = new PipelineProject(this, "ReactAppBuildAction", {
       buildSpec: getBuildSpec(),

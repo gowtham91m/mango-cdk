@@ -16,7 +16,7 @@ import {
   HostedZone,
   RecordTarget,
 } from "aws-cdk-lib/aws-route53";
-import { Distribution, OriginRequestPolicy } from "aws-cdk-lib/aws-cloudfront";
+import { Distribution, OriginRequestPolicy, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { CdkStackProps } from "../../pipeline-stack";
@@ -57,6 +57,7 @@ export class CloudfrontStack extends Stack {
         defaultBehavior: {
           origin: new S3Origin(bucket),
           originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
+          viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS
         },
         defaultRootObject: "index.html",
         certificate: this.cert,
